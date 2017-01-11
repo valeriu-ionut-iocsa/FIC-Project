@@ -1,0 +1,3 @@
+/home/vevu/Desktop/cmake_version/CMakeFiles/rebuild_cache.dir
+/home/vevu/Desktop/cmake_version/CMakeFiles/edit_cache.dir
+/home/vevu/Desktop/cmake_version/CMakeFiles/FICProject.dir

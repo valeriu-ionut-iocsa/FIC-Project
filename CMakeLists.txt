@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project( FICProject )
+find_package( OpenCV REQUIRED )
+file(GLOB SOURCES "*.cpp") 
+add_executable(FICProject ${SOURCES})
+target_link_libraries( FICProject ${OpenCV_LIBS} )
