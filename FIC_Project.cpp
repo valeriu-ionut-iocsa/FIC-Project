@@ -9,12 +9,13 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio/videoio_c.h>
 #include <opencv2/videoio.hpp>
+#include <unistd.h>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <unistd.h>
 
 #include "TCPClient.h"
 
@@ -34,7 +35,9 @@ void goForward();
 float distance(float x1, float x2, float y1, float y2);
 float angle(float x1, float x2, float y1, float y2);
 
-bool debug = true;
+bool debug = false;
+int waitBetweenLoops = 3000000;
+
 bool firstTime = true;
 Vec3f playingFieldCircle;
 
@@ -48,6 +51,10 @@ int port = 20231;
 TCPClient client;
 
 int main(int argc, char* argv[]) {
+	if (argc >= 2 && strcmp(argv[1], "/d") == 0)
+		debug = true;
+	if (argc == 3)
+		waitBetweenLoops = atoi(argv[2]);
 	client.conn(address, port);
 	processVideo();
 	return 0;
@@ -73,8 +80,10 @@ void processVideo() {
 		if (cameraFeed.empty()) {
 			cout << "video not found\n";
 			capture.open(videoPath);
-		} else
+		} else {
 			processImage(cameraFeed);
+			usleep(waitBetweenLoops);
+		}
 	}
 }
 
@@ -97,6 +106,11 @@ void processImage(Mat image) {
 		}
 
 		playingFieldCircle = circles[0];
+		cout << endl << "Playing field center coordinates:   "
+				<< playingFieldCircle[0] << "   " << playingFieldCircle[1]
+				<< endl;
+		cout << "Playing field radius:   " << playingFieldCircle[2] << endl
+				<< endl;
 		if (debug) {
 			Point center(cvRound(playingFieldCircle[0]),
 					cvRound(playingFieldCircle[1]));
@@ -226,20 +240,20 @@ void sendCommand(Point2f myCenter, Point2f myDirectionCenter,
 }
 
 void rotate(float angle) {
-	float timeToTurn360Degrees = 1000.0;
+	float timeToTurn360Degrees = 1000000.0;
 	if (angle < 0)
 		client.send_data("r");
 	else
 		client.send_data("l");
 
 	int timeInMillis = floor(timeToTurn360Degrees * abs(angle) / 360.0);
-	cout << "sleep for " << timeInMillis << " milliseconds" << endl;
+	cout << "sleep for " << timeInMillis << " microseconds" << endl;
 	usleep(timeInMillis);
 }
 
 void goForward() {
 	client.send_data("f");
-	usleep(1000);
+	usleep(1000000);
 	client.send_data("s");
 }
 
